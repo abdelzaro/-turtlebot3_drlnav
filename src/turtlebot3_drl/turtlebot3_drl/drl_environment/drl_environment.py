@@ -75,6 +75,7 @@ class DRLEnvironment(Node):
         self.new_goal = False
         self.goal_angle = 0.0
         self.goal_distance = MAX_GOAL_DISTANCE
+        self.previous_goal_distance = MAX_GOAL_DISTANCE
         self.initial_distance_to_goal = MAX_GOAL_DISTANCE
 
         self.scan_ranges = [LIDAR_DISTANCE_CAP] * NUM_SCAN_SAMPLES
@@ -153,6 +154,7 @@ class DRLEnvironment(Node):
         while goal_angle < -math.pi:
             goal_angle += 2 * math.pi
 
+        self.previous_goal_distance = self.goal_distance
         self.goal_distance = distance_to_goal
         self.goal_angle = goal_angle
 
@@ -266,7 +268,7 @@ class DRLEnvironment(Node):
         # Prepare repsonse
         response.state = self.get_state(request.previous_action[LINEAR], request.previous_action[ANGULAR])
         response.reward = rw.get_reward(self.succeed, action_linear, action_angular, self.goal_distance,
-                                            self.goal_angle, self.obstacle_distance)
+                                            self.goal_angle, self.obstacle_distance, self.previous_goal_distance)
         response.done = self.done
         response.success = self.succeed
         response.distance_traveled = 0.0
